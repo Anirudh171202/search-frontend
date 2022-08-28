@@ -5,22 +5,22 @@ import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import MovieComponent from "./components/MovieComponent";
 import MovieInfoComponent from "./components/MovieInfoComponent";
-import Search from "./components/search";
-import MeiliSearch from "meilisearch";
+import Footer from "./components/footer"
+import img from "./media/goldengate.jpeg";
+import jwt_decode from "jwt-decode";
 
-const client = new MeiliSearch({
-  host: "http://127.0.0.1:7700/",
-});
-
-const index = client.getIndex("movies");
+//645495613444-69mmud7u5afbdhe401nvb42ctg9ocd75.apps.googleusercontent.com
+//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
 
 export const API_KEY = "a9118a3a";
 
 const Logo = styled.img`
-  height: 40px;
-  width: 150px;
-  margin-right: 20px;
-  margin-bottom: 8px;`
+  height: 60px;
+  width: 300px;
+  /* margin-right: 20px; */
+  margin-bottom: 20px;
+  margin-top: 40px`
+  
   ;
 
   const Container = styled.div`
@@ -28,32 +28,41 @@ const Logo = styled.img`
   flex-direction: column;
 `;
 
-const SearchContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 15px; 
-
-`;
-
 const AppName = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-left: auto; 
-margin-right: 45vw;
+  
 `;
+
+
+const TopRight = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin-left:auto;
+  
+  font-size: medium;
+  color: black;
+  align-items: right;
+  margin-right:15px;
+  
+
+  
+`;
+
 const Header = styled.div`
-  background-color: black;
+  /* background-color: black; */
+  background-image: url(${img}) ;
+  background-position:center;
   color: white;
   display: flex;
   justify-content: space-between;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   padding: 10px;
-  font-size: 25px;
+  font-size: 40px;
   font-weight: bold;
-  box-shadow: 0 3px 6px 0 #555;
+  /* box-shadow: 0 3px 6px 0 #555; */
 `;
 const SearchBox = styled.div`
   display: flex;
@@ -66,6 +75,9 @@ const SearchBox = styled.div`
   border-width: 10px;
   outline: 10px;
   border: solid;
+  margin-bottom: 40px;
+  margin-top: 20px;
+  /* margin-right:55px; */
   
   
 `;
@@ -81,10 +93,11 @@ const MovieImage = styled.img`
 const SearchInput = styled.input`
   color: black;
   font-size: 24px;
-  // font-weight: bold;
+  /* font-weight: bold; */
   border: none;
   outline: none;
   margin-left: 15px;
+  width: calc(100% - 20px);
 `;
 const MovieListContainer = styled.div`
   display: flex;
@@ -101,9 +114,11 @@ const Placeholder = styled.img`
   opacity: 50%;
 `;
 
+const Empty = styled.div``;
 function App() {
-  const [searchQuery, updateSearchQuery] = useState("");
 
+  const [searchQuery, updateSearchQuery] = useState("");
+  const [user, setUser] = useState()
   const [movieList, updateMovieList] = useState([]);
   const [selectedMovie, onMovieSelect] = useState();
 
@@ -116,6 +131,14 @@ function App() {
     updateMovieList(response.data.Search);
   };
 
+  const logOut = () =>{
+    
+    console.log("Logged out");
+    /* document.getElementById("signInDiv").hidden = false;  */
+    setUser();
+    alert("Logged out successfully");
+  };
+
   const onTextChange = (e) => {
     onMovieSelect("")
     clearTimeout(timeoutId);
@@ -123,16 +146,55 @@ function App() {
     const timeout = setTimeout(() => fetchData(e.target.value), 500);
     updateTimeoutId(timeout);
   };
+
+  React.useEffect(()=> onInit(), []);
+  const onInit = () =>{
+   
+    setTimeout(() => fetchData("fast"), 500);
+    
+  }
+
+  function handleCallbackResponse(response){
+    console.log("encoded jwt token", jwt_decode(response.credential));
+    setUser(jwt_decode(response.credential));
+    /* document.getElementById("signInDiv").hidden = true;  */
+  }
+  /* global google */
+  useEffect(() => {
+  google.accounts.id.initialize({
+    client_id: "645495613444-69mmud7u5afbdhe401nvb42ctg9ocd75.apps.googleusercontent.com",
+    callback: handleCallbackResponse
+  });
+
+  google.accounts.id.renderButton(
+    document.getElementById("signInDiv"),
+    {theme: "outline", size: "large"}
+  );
+
+
+}, []);
+  
+
+ 
   return (
+    
 <Container>
-      <Header><Logo src="/geoidentity.png"/><AppName>Video Search</AppName>
-     
-      </Header>
-      <SearchContainer>
-      {/* <Search /> */}
+      <Header>
+      
+      <TopRight>
+      {(!user || user=={}) && <div id="signInDiv"></div>}
+      {user && <div id="logged"><div className="welcome">Welcome Back, {user.name.split(" ")[0]}</div><button onClick={logOut}><img id="icon" src={user.picture}></img></button></div>}
+      </TopRight>
+      <Logo src="/geoidentity.png"/>
+      
+      {/* <AppName>Video Search</AppName> */}
+      
+      
       <SearchBox><SearchIcon src="/search.png"/><SearchInput placeholder="Search" value={searchQuery}
             onChange={onTextChange}/></SearchBox>
-      </SearchContainer>
+     
+      </Header>
+      
       {selectedMovie && <MovieInfoComponent selectedMovie={selectedMovie} onMovieSelect={onMovieSelect}/>}
       <MovieListContainer>
         {movieList?.length ? (
@@ -147,101 +209,11 @@ function App() {
           <Placeholder src="/search.png" />
         )}
       </MovieListContainer>
+      <Footer />
       </Container>
    
     
   );
 }
-
-// function App() {
-//   const [searchedWord, setSearch] = useState("");
-//   const [resultSearch, setResults] = useState([]);
-//   const [resultCards, setCards] = useState([]);
-
-//   useEffect(() => {
-//     // Create an scoped async function in the hook
-//     async function searchWithMeili() {
-//       const search = await index.search(searchedWord);
-//       console.log(search);
-//       setResults(search.hits);
-//     }
-//     // Execute the created function directly
-//     searchWithMeili();
-//   }, [searchedWord]);
-
-//   useEffect(() => {
-//     let arrayItems = [];
-//     for (let i = 0; i < resultSearch.length; i++) {
-//       const product = resultSearch[i];
-//       arrayItems.push(
-//         <div class="flex w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6 p-3">
-//           <a
-//             href={product.url}
-//             class="flex-1 rounded overflow-hidden shadow-lg"
-//           >
-//             <img
-//               class="w-full h-48 object-cover"
-//               src={product.images}
-//               alt={product.name}
-//               onError={(e)=>{e.target.onerror = null; e.target.src="/wide_logo.png"}}
-//             />
-//             <div class="px-6 py-3">
-//               <div class="font-bold text-sm mb-1 text-gray-600 capitalize">
-//                 {product.category}
-//               </div>
-//               <div class="font-bold text-xl mb-2 text-gray-800">
-//                 {product.vendor} - {product.name.substr(0, 20)}
-//               </div>
-//               <p class="text-black text-xl font-bold text-base py-2">
-//                 $ {product.price}
-//               </p>
-//             </div>
-//           </a>
-//         </div>
-//       );
-//     }
-//     setCards(arrayItems);
-//   }, [resultSearch]);
-
-//   return (
-//     <div className="mx-auto">
-//       <div class="header font-sans text-white items-center justify-center">
-//         <header class="py-12">
-//           <img
-//             class="h-20 w-auto items-center justify-center p-2 mx-auto"
-//             src="/wide_logo.png"
-//             style={{ filter: "invert(0%)" }}
-//             alt=""
-//           />
-//           <h1 class="flex flex-wrap flex-grow text-3xl w-full justify-center p-4">
-//             Stop looking for an item — find it and work hard!
-//           </h1>
-//           <div class="border rounded overflow-hidden w-full flex justify-center mx-auto searchBox mt-6">
-//             <button class="flex items-center justify-center px-4 shadow-md bg-white text-black">
-//               <svg
-//                 class="h-4 w-4 text-grey-dark"
-//                 fill="currentColor"
-//                 xmlns="http://www.w3.org/2000/svg"
-//                 viewBox="0 0 24 24"
-//               >
-//                 <path d="M16.32 14.9l5.39 5.4a1 1 0 0 1-1.42 1.4l-5.38-5.38a8 8 0 1 1 1.41-1.41zM10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12z" />
-//               </svg>
-//             </button>
-//             <input
-//               type="text"
-//               value={searchedWord}
-//               onChange={(event) => setSearch(event.target.value)}
-//               class="px-6 py-4 w-full text-black"
-//               placeholder="Product, sport, color, …"
-//             />
-//           </div>
-//         </header>
-//       </div>
-//       <div>
-//         <div class="flex flex-wrap searchResults">{resultCards}</div>
-//       </div>
-//     </div>
-//   );
-// }
 
 export default App;

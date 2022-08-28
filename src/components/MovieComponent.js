@@ -8,6 +8,7 @@ const MovieContainer = styled.div`
   width: 280px;
   box-shadow: 0 3px 10px 0 #aaa;
   cursor: pointer;
+  border-radius: 7px;
 `;
 const CoverImage = styled.img`
   object-fit: cover;

@@ -4,3 +4,45 @@ html, body {
 body {
   position: relative
 }
+.footer{
+  margin-top: 1rem;
+  padding: 1rem;
+  /* background-image: url("media/goldengate.jpeg");
+  background-position: ; */
+  background-color: black;
+  color:azure;
+  /* position: fixed; */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+
+}
+
+#signInDiv{
+  display: flex;
+  align-items: right;
+  margin-right: 5px;
+  color:yellow;
+}
+
+#icon{
+  clip-path: circle();
+  width: 30px;
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 5px;
+
+}
+
+#logged{
+  display: flex;
+  flex-direction: row;
+  
+}
+
+.welcome {
+  font-family: 'Roboto';
+  font-size: 24px;
+  font-weight: 100;
+}

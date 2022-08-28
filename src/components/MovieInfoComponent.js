@@ -9,6 +9,7 @@ const Container = styled.div`
   padding: 20px 30px;
   justify-content: center;
   border-bottom: 1px solid lightgray;
+  
 `;
 const CoverImage = styled.img`
   object-fit: cover;
